@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="stanford-russian-corenlp-models">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/CoreNLP-master/stanford-russian-corenlp-models.jar!/" />
+    </SOURCES>
+  </library>
+</component>
