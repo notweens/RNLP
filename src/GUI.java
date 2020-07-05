@@ -46,7 +46,6 @@ public class GUI {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
-                    //System.out.println(getText());
                 }
             }
         });
@@ -54,8 +53,12 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 List<String> str = new ArrayList<String>(Arrays.asList(textArea.getText().split(",")));
-                core.analyzeText(str);
-                System.out.println(str);
+                try {
+                    core.analyzeText(str);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                //System.out.println(str);
             }
         });
     }
