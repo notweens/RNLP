@@ -74,7 +74,7 @@
           <doubleBuffered value="false"/>
           <font name="Arial" size="12" style="0"/>
           <inheritsPopupMenu value="false"/>
-          <lineWrap value="false"/>
+          <lineWrap value="true"/>
           <text value=""/>
           <toolTipText value="Введите текст здесь..."/>
           <wrapStyleWord value="false"/>

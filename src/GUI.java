@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -30,8 +31,7 @@ public class GUI {
 
     public GUI() {
         initialize();
-        final RNLP core = new RNLP();
-        core.main(null);
+        RNLP.main(null);
         fileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -42,7 +42,7 @@ public class GUI {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     file = fileChooser.getSelectedFile();
                     try {
-                        core.analyzeText(getText());
+                        Output(RNLP.analyzeText(getText()));
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
@@ -54,13 +54,30 @@ public class GUI {
             public void actionPerformed(ActionEvent e) {
                 List<String> str = new ArrayList<String>(Arrays.asList(textArea.getText().split(",")));
                 try {
-                    core.analyzeText(str);
+                    Output(RNLP.analyzeText(str));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
-                //System.out.println(str);
             }
         });
+    }
+
+    public void Output(String text) {
+        JFrame outputFrame = new JFrame("Tagged Text");
+        JTextArea messagesArea = new JTextArea();
+        messagesArea.setEditable(false);
+        outputFrame.add(messagesArea);
+        outputFrame.setSize(400,300);
+        outputFrame.setVisible(true);
+        messagesArea.setFont(new Font("Raster Fonts",Font.BOLD,11));
+        messagesArea.setLineWrap(true);
+        messagesArea.setWrapStyleWord(true);
+        JScrollPane scroll = new JScrollPane(messagesArea);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        outputFrame.getContentPane().add(scroll);
+        outputFrame.add(scroll);
+        messagesArea.append(text);
     }
 
     private static List<String> getText() throws IOException {
@@ -69,15 +86,11 @@ public class GUI {
         try {
             br = new BufferedReader(new FileReader(file));
             String line;
-            while ((line = br.readLine()) != null) {
-                res.add(line);
-            }
+            while ((line = br.readLine()) != null) res.add(line);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
-            if (br != null) {
-                br.close();
-            }
+            if (br != null) br.close();
         }
         return res;
     }

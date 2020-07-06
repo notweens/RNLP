@@ -1,5 +1,3 @@
-import java.util.UUID;
-
 public class Person {
     public String uuid;
     public String lastName;

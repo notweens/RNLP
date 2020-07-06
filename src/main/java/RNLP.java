@@ -1,9 +1,7 @@
-import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.international.russian.process.RussianLemmatizationAnnotator;
 import edu.stanford.nlp.international.russian.process.RussianMorphoAnnotator;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.tokensregex.*;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
@@ -15,12 +13,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
-import java.util.regex.Pattern;
 
 public class RNLP {
     private static StanfordCoreNLP pipeline;
-    private static String basePath = new File("").getAbsolutePath();
+    private static final String basePath = new File("").getAbsolutePath();
+    private static String personMentioned = "";
 
     public static void main(String[] args) {
         Properties props = new Properties();
@@ -36,16 +33,13 @@ public class RNLP {
         pipeline.addAnnotator(new TokensRegexAnnotator(basePath + "\\src\\main\\example.txt"));
     }
 
-    public String tag(Person person, String word) {
+    public static String tag(Person person, String word) {
+        personMentioned = person.uuid;
         word = "<" + person.uuid + ">" + word + "</" + person.uuid + ">";
         return word;
     }
 
-    public void analyzeText(List<String> text) throws IOException {
-        Env env = TokenSequencePattern.getNewEnv();
-        env.setDefaultStringMatchFlags(NodePattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        env.setDefaultStringPatternFlags(Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
-        CoreMapExpressionExtractor extractor = CoreMapExpressionExtractor.createExtractorFromFile(env, basePath + "\\src\\main\\example.rules");
+    public static String analyzeText(List<String> text) throws IOException {
         FileInputStream file = new FileInputStream(basePath + "\\src\\main\\person.xlsx");
         XSSFWorkbook workbook = new XSSFWorkbook(file);
         XSSFSheet sheet = workbook.getSheetAt(0);
@@ -57,40 +51,52 @@ public class RNLP {
             for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) cells[j] = formatter.formatCellValue(row.getCell(j));
             persons[i - 1] = new Person(cells[0], cells[1], cells[2], cells[3], cells[4], cells[5], cells[6]);
         }
+        StringBuilder wholeWord = new StringBuilder();
+        CoreLabel token, nextToken = null;
+        Person ignoreNext = null;
         for (String line : text) {
             if (!line.isEmpty()) {
                 Annotation annotation = pipeline.process(line);
                 List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
                 for (CoreMap sentence : sentences) {
-                    List<MatchedExpression> matchedExpressions = extractor.extractExpressions(sentence);
-                    for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+                    for (int i = 0; i < sentence.get(CoreAnnotations.TokensAnnotation.class).size(); i++) {
+                        token = sentence.get(CoreAnnotations.TokensAnnotation.class).get(i);
+                        String word = token.word();
+                        if (i + 1 != sentence.get(CoreAnnotations.TokensAnnotation.class).size()) nextToken = sentence.get(CoreAnnotations.TokensAnnotation.class).get(i + 1);
+                        if (ignoreNext != null) {
+                            word = word + "</" + ignoreNext.uuid + ">";
+                            wholeWord.append(word);
+                            if (nextToken != null) {
+                                if (!nextToken.word().contains(".") || !nextToken.word().contains("!") || !nextToken.word().contains("?")) wholeWord.append(" ");
+                            }
+                            else wholeWord.append(" ");
+                            ignoreNext = null;
+                            continue;
+                        }
                         String lemma = token.lemma();
                         lemma = lemma.substring(0, 1).toUpperCase() + lemma.substring(1);
-                        //System.out.print("[" + lemma + "]");
-                        String word = token.word();
                         String ner = token.ner() == null ? "0" : token.ner();
                         String pos = token.tag();
-                        for (int i = 0; i < persons.length; i++) {
-                            //System.out.print("'" + token.lemma() + "'");
-                            if (lemma.contains(persons[i].firstName) || lemma.contains(persons[i].lastName) || lemma.contains(persons[i].middleName)) word = tag(persons[i], word);
-                            else if (persons[i].address.contains(lemma)/* && ner == "ADDRESS"*/) word = tag(persons[i], word);
-                            else if (ner.contains("PHNUM") && persons[i].number.contains(word)) word = tag(persons[i], word);
-                            else if (ner.contains("DATE") || pos.contains("NUM") && persons[i].date.contains(word)) word = tag(persons[i], word);
-                            else if (pos.contains("DET")) word = tag(persons[i], word);
+                        for (Person person : persons) {
+                            if (lemma.contains(person.firstName) || lemma.contains(person.lastName) || lemma.contains(person.middleName)) word = tag(person, word);
+                            else if (ner.contains("ADDRESS") && nextToken != null && nextToken.ner() != null && nextToken.ner().contains("ADDRESS") && (person.address.contains(nextToken.word()) || person.address.contains(word))) {
+                                ignoreNext = person;
+                                word = "<" + person.uuid + ">" + word;
+                                personMentioned = person.uuid;
+                            } else if (person.address.contains(lemma)) word = tag(person, word);
+                            else if (ner.contains("PHNUM") && person.number.contains(word)) word = tag(person, word);
+                            else if (ner.contains("DATE") || pos.contains("NUM") && person.date.contains(word)) word = tag(person, word);
+                            else if (pos.contains("DET") && !lemma.contains("Свой") && personMentioned.equals(person.uuid)) word = tag(person, word);
                         }
-                        /*String word = token.word();
-                        String pos = token.tag();
-                        String lem = token.lemma();
-                        String ne = token.ner();*/
-                        System.out.print(token.after().contains(".") || token.after().contains("!") || token.after().contains("?") ? word : word + " ");
-                        //System.out.println(String.format("Print: word: [%s] pos: [%s] lem: [%s] ne: [%s] (%s)", word, pos, lem, ne == null ? "0" : ne, token.get(CoreAnnotations.CoNLLUFeats.class)));
-                    }
-                    for (MatchedExpression me : matchedExpressions) {
-                        System.out.println("matched expression: " + me.getText());
+                        wholeWord.append(word);
+                        if (nextToken != null) {
+                            if (!nextToken.word().contains(".") || !nextToken.word().contains("!") || !nextToken.word().contains("?")) wholeWord.append(" ");
+                        }
+                        else wholeWord.append(" ");
                     }
                 }
             }
         }
-        System.out.println();
+        return wholeWord.toString();
     }
 }
