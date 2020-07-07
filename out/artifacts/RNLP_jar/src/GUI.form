@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="GUI">
+  <grid id="27dc6" binding="rootPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="10" vgap="10">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="545" height="1708"/>
+    </constraints>
+    <properties>
+      <autoscrolls value="true"/>
+      <background color="-1"/>
+      <font/>
+      <foreground color="-1"/>
+      <opaque value="true"/>
+      <preferredSize width="400" height="500"/>
+      <requestFocusEnabled value="true"/>
+      <toolTipText value="Введите текст..."/>
+      <visible value="true"/>
+    </properties>
+    <clientProperties>
+      <html.disable class="java.lang.Boolean" value="true"/>
+    </clientProperties>
+    <border type="etched" title-justification="2">
+      <font/>
+    </border>
+    <children>
+      <component id="223bd" class="javax.swing.JLabel" binding="label">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Welcome to Russian NLP"/>
+        </properties>
+      </component>
+      <vspacer id="4b52e">
+        <constraints>
+          <grid row="0" column="3" row-span="8" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <vspacer id="679a">
+        <constraints>
+          <grid row="0" column="0" row-span="8" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <component id="9a2db" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Выберите файл, который хотите обработать или введите текст в поле"/>
+        </properties>
+      </component>
+      <component id="522c1" class="javax.swing.JButton" binding="fileButton">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
+            <minimum-size width="200" height="50"/>
+            <preferred-size width="200" height="50"/>
+            <maximum-size width="200" height="50"/>
+          </grid>
+        </constraints>
+        <properties>
+          <text value="Выбрать файл"/>
+        </properties>
+      </component>
+      <component id="68feb" class="javax.swing.JTextArea" binding="textArea">
+        <constraints>
+          <grid row="3" column="1" row-span="2" col-span="2" vsize-policy="0" hsize-policy="0" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="300" height="250"/>
+            <preferred-size width="300" height="250"/>
+            <maximum-size width="300" height="250"/>
+          </grid>
+        </constraints>
+        <properties>
+          <background color="-2101249"/>
+          <doubleBuffered value="false"/>
+          <font name="Arial" size="12" style="0"/>
+          <inheritsPopupMenu value="false"/>
+          <lineWrap value="true"/>
+          <text value=""/>
+          <toolTipText value="Введите текст здесь..."/>
+          <wrapStyleWord value="false"/>
+        </properties>
+      </component>
+      <component id="71f14" class="javax.swing.JButton" binding="sendButton">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Отправить"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>

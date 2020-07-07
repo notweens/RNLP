@@ -69,7 +69,7 @@ public class GUI {
         outputFrame.add(messagesArea);
         outputFrame.setSize(400,300);
         outputFrame.setVisible(true);
-        messagesArea.setFont(new Font("Raster Fonts",Font.BOLD,11));
+        messagesArea.setFont(new Font("Raster Fonts", Font.BOLD,11));
         messagesArea.setLineWrap(true);
         messagesArea.setWrapStyleWord(true);
         JScrollPane scroll = new JScrollPane(messagesArea);
