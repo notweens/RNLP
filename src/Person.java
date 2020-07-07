@@ -26,7 +26,6 @@ public class Person {
         }
         this.address = address;
         this.number = number;
-        System.out.println(address);
     }
 }
 

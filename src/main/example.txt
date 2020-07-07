@@ -17,4 +17,4 @@ $NUMOFHOME = "/^(д|кв)$/"
 { ruleType: "tokens", pattern: ($INITIALS), result: "INITIALS" }
 { ruleType: "tokens", pattern: (($STREET)([])), action: Annotate($0, ner, "ADDRESS"), priority: 0 }  
 { ruleType: "tokens", pattern: (($CITY)([])), action: Annotate($0, ner, "ADDRESS"), priority: 0 }
-{ ruleType: "tokens", pattern: (([])($NUMOFHOME)([])), action: Annotate($0, ner, "ADDRESS"), priority: 0 }
+{ ruleType: "tokens", pattern: (($NUMOFHOME)([])), action: Annotate($0, ner, "ADDRESS"), priority: 0 }
