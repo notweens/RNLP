@@ -66,17 +66,31 @@ public class RNLP {
                         lemma = lemma.substring(0, 1).toUpperCase() + lemma.substring(1);
                         String ner = token.ner() == null ? "0" : token.ner();
                         String pos = token.tag();
-                        System.out.println(ner + pos);
+                        String n_ner = "0";
+                        System.out.println(word + ner + pos);
                         for (Person person : persons) {
                             if (lemma.contains(person.firstName) || lemma.contains(person.lastName) || lemma.contains(person.middleName)) word = tag(person, word);
-                            else if (ner.contains("ADDRESS") && nextToken != null && nextToken.ner() != null && nextToken.ner().contains("ADDRESS") && (!nextToken.ner().equals("д") || !nextToken.ner().equals("кв")) && (person.address.contains(nextToken.word()) || person.address.contains(word))) {
-                                ignoreNext = person;
-                                word = "<" + person.uuid + ">" + word;
-                                personMentioned = person.uuid;
-                                break;
-                            } else if (person.address.contains(lemma)) word = tag(person, word);
+                            else if (ner.contains("ADDRESS") && (lemma.equals("Город") || lemma.equals("Улица") || lemma.equals("Д") || lemma.equals("Кв"))) {
+                                n_ner = nextToken.ner() == null ? "0" : nextToken.ner();
+                                if (n_ner.contains("ADDRESS") && person.address.contains(nextToken.word())) {
+                                    ignoreNext = person;
+                                    word = "<" + person.uuid + ">" + word;
+                                    personMentioned = person.uuid;
+                                    break;
+                                }
+                            }
+                            else if (person.address.contains(lemma)) word = tag(person, word);
                             else if (ner.contains("PHNUM") && person.number.contains(word)) word = tag(person, word);
-                            else if (ner.contains("DATE") || pos.contains("NUM") && person.date.contains(word)) word = tag(person, word);
+                            else if (ner.contains("DATE") && person.date.contains(word)) word = tag(person, word);
+                            else if (pos.contains("NUM") && person.date.contains(word)) {
+                                int year;
+                                try {
+                                    year = Integer.parseInt(word);
+                                } catch (NumberFormatException e) {
+                                    year = 0;
+                                }
+                                if (year >= 1800 && year <= 2020) word = tag(person, word);
+                            }
                             else if (pos.contains("DET") && !lemma.contains("Свой") && !lemma.contains("Наш") && personMentioned.equals(person.uuid)) word = tag(person, word);
                         }
                         wholeWord.append(word);
