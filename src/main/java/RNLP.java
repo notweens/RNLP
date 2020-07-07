@@ -16,7 +16,7 @@ import java.util.Properties;
 
 public class RNLP {
     private static StanfordCoreNLP pipeline;
-    private static final String basePath = new File("").getAbsolutePath();
+    public static final String basePath = new File("").getAbsolutePath();
     private static String personMentioned = "";
 
     public static void main(String[] args) {
@@ -39,18 +39,7 @@ public class RNLP {
         return word;
     }
 
-    public static String analyzeText(List<String> text) throws IOException {
-        FileInputStream file = new FileInputStream(basePath + "\\src\\main\\person.xlsx");
-        XSSFWorkbook workbook = new XSSFWorkbook(file);
-        XSSFSheet sheet = workbook.getSheetAt(0);
-        Person [] persons = new Person[sheet.getPhysicalNumberOfRows() - 1];
-        DataFormatter formatter = new DataFormatter();
-        for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
-            XSSFRow row = sheet.getRow(i);
-            String[] cells = new String[row.getPhysicalNumberOfCells()];
-            for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) cells[j] = formatter.formatCellValue(row.getCell(j));
-            persons[i - 1] = new Person(cells[0], cells[1], cells[2], cells[3], cells[4], cells[5], cells[6]);
-        }
+    public static String analyzeText(List<String> text, Person[] persons) throws IOException {
         StringBuilder wholeWord = new StringBuilder();
         CoreLabel token, nextToken = null;
         Person ignoreNext = null;
@@ -77,16 +66,18 @@ public class RNLP {
                         lemma = lemma.substring(0, 1).toUpperCase() + lemma.substring(1);
                         String ner = token.ner() == null ? "0" : token.ner();
                         String pos = token.tag();
+                        System.out.println(ner + pos);
                         for (Person person : persons) {
                             if (lemma.contains(person.firstName) || lemma.contains(person.lastName) || lemma.contains(person.middleName)) word = tag(person, word);
-                            else if (ner.contains("ADDRESS") && nextToken != null && nextToken.ner() != null && nextToken.ner().contains("ADDRESS") && (person.address.contains(nextToken.word()) || person.address.contains(word))) {
+                            else if (ner.contains("ADDRESS") && nextToken != null && nextToken.ner() != null && nextToken.ner().contains("ADDRESS") && (!nextToken.ner().equals("д") || !nextToken.ner().equals("кв")) && (person.address.contains(nextToken.word()) || person.address.contains(word))) {
                                 ignoreNext = person;
                                 word = "<" + person.uuid + ">" + word;
                                 personMentioned = person.uuid;
+                                break;
                             } else if (person.address.contains(lemma)) word = tag(person, word);
                             else if (ner.contains("PHNUM") && person.number.contains(word)) word = tag(person, word);
                             else if (ner.contains("DATE") || pos.contains("NUM") && person.date.contains(word)) word = tag(person, word);
-                            else if (pos.contains("DET") && !lemma.contains("Свой") && personMentioned.equals(person.uuid)) word = tag(person, word);
+                            else if (pos.contains("DET") && !lemma.contains("Свой") && !lemma.contains("Наш") && personMentioned.equals(person.uuid)) word = tag(person, word);
                         }
                         wholeWord.append(word);
                         if (nextToken != null) {

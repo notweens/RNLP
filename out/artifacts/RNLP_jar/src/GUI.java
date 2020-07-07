@@ -1,3 +1,8 @@
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -23,15 +28,31 @@ public class GUI {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                GUI gui = new GUI();
+                GUI gui = null;
+                try {
+                    gui = new GUI();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 gui.frame.setVisible(true);
             }
         });
     }
 
-    public GUI() {
+    public GUI() throws IOException {
         initialize();
         RNLP.main(null);
+        FileInputStream XMLFile = new FileInputStream(RNLP.basePath + "\\src\\main\\person.xlsx");
+        XSSFWorkbook workbook = new XSSFWorkbook(XMLFile);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        Person [] persons = new Person[sheet.getPhysicalNumberOfRows() - 1];
+        DataFormatter formatter = new DataFormatter();
+        for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+            XSSFRow row = sheet.getRow(i);
+            String[] cells = new String[row.getPhysicalNumberOfCells()];
+            for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) cells[j] = formatter.formatCellValue(row.getCell(j));
+            persons[i - 1] = new Person(cells[0], cells[1], cells[2], cells[3], cells[4], cells[5], cells[6]);
+        }
         fileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -42,7 +63,7 @@ public class GUI {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     file = fileChooser.getSelectedFile();
                     try {
-                        Output(RNLP.analyzeText(getText()));
+                        Output(RNLP.analyzeText(getText(), persons));
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
@@ -54,7 +75,7 @@ public class GUI {
             public void actionPerformed(ActionEvent e) {
                 List<String> str = new ArrayList<String>(Arrays.asList(textArea.getText().split(",")));
                 try {
-                    Output(RNLP.analyzeText(str));
+                    Output(RNLP.analyzeText(str, persons));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }

@@ -13,8 +13,20 @@ public class Person {
         this.firstName = firstName;
         this.middleName = middleName;
         this.date = date;
+        while (address.contains("город") || address.contains("улица") || address.contains("кв")) {
+            address = address.replace("город", "");
+            address = address.replace("улица", "");
+            address = address.replace("кв", "");
+            char[] chars = address.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                if (i != 0 && chars[i] == 'д' && chars[i - 1] == ' ' && chars[i + 1] == ' ') {
+                    address = address.substring(0, i) + "" + address.substring(i + 1);
+                }
+            }
+        }
         this.address = address;
         this.number = number;
+        System.out.println(address);
     }
 }
 
