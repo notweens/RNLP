@@ -5,12 +5,8 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -39,7 +35,7 @@ public class RNLP {
         return word;
     }
 
-    public static String analyzeText(List<String> text, Person[] persons) throws IOException {
+    public static String analyzeText(List<String> text, Person[] persons) {
         StringBuilder wholeWord = new StringBuilder();
         CoreLabel token, nextToken = null;
         Person ignoreNext = null;
@@ -67,7 +63,6 @@ public class RNLP {
                         String ner = token.ner() == null ? "0" : token.ner();
                         String pos = token.tag();
                         String n_ner = "0";
-                        System.out.println(word + ner + pos);
                         for (Person person : persons) {
                             if (lemma.contains(person.firstName) || lemma.contains(person.lastName) || lemma.contains(person.middleName)) word = tag(person, word);
                             else if (ner.contains("ADDRESS") && (lemma.equals("Город") || lemma.equals("Улица") || lemma.equals("Д") || lemma.equals("Кв"))) {

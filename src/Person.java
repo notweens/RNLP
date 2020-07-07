@@ -28,5 +28,3 @@ public class Person {
         this.number = number;
     }
 }
-
-

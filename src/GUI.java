@@ -6,8 +6,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,17 +23,15 @@ public class GUI {
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                GUI gui = null;
-                try {
-                    gui = new GUI();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                gui.frame.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            GUI gui = null;
+            try {
+                gui = new GUI();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            assert gui != null;
+            gui.frame.setVisible(true);
         });
     }
 
@@ -53,33 +49,23 @@ public class GUI {
             for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) cells[j] = formatter.formatCellValue(row.getCell(j));
             persons[i - 1] = new Person(cells[0], cells[1], cells[2], cells[3], cells[4], cells[5], cells[6]);
         }
-        fileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fileChooser = new JFileChooser();
-                FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
-                fileChooser.setFileFilter(filter);
-                int returnVal = fileChooser.showOpenDialog(rootPanel);
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    file = fileChooser.getSelectedFile();
-                    try {
-                        Output(RNLP.analyzeText(getText(), persons));
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
-                }
-            }
-        });
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                List<String> str = new ArrayList<String>(Arrays.asList(textArea.getText().split(",")));
+        fileButton.addActionListener(e -> {
+            fileChooser = new JFileChooser();
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("TEXT FILES", "txt", "text");
+            fileChooser.setFileFilter(filter);
+            int returnVal = fileChooser.showOpenDialog(rootPanel);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                file = fileChooser.getSelectedFile();
                 try {
-                    Output(RNLP.analyzeText(str, persons));
+                    Output(RNLP.analyzeText(getText(), persons));
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
             }
+        });
+        sendButton.addActionListener(e -> {
+            List<String> str = new ArrayList<>(Arrays.asList(textArea.getText().split(",")));
+            Output(RNLP.analyzeText(str, persons));
         });
     }
 
@@ -102,16 +88,12 @@ public class GUI {
     }
 
     private static List<String> getText() throws IOException {
-        List<String> res = new ArrayList<String>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(file));
+        List<String> res = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) res.add(line);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } finally {
-            if (br != null) br.close();
         }
         return res;
     }
