@@ -1,1 +1,0 @@
-java -Xmx4096m -jar RNLP.jar
